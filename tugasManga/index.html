@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<style>
+    #cover {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+        background-color: #6ECCAF;
+        margin: 10px;
+        justify-content: center;
+        align-items: center;
+
+
+    }
+
+    img {
+        width: 200px;
+
+    }
+
+    .button {
+        text-align: center;
+    }
+</style>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Mangatoon</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">Action</a>
+                        <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link disabled" href="#">Disabled</a>
+                </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+        </div>
+    </nav>
+    <div id="cover"></div>
+
+
+    <div class="button">
+        <button type="submit" onclick="prev()">
+            < </button>
+                <input type="number" name="num" id="number" value="6" onchange="pageLimit()">
+                <button type="submit" onclick="next()">></button>
+    </div>
+
+
+    <script>
+
+        let limit = Number(document.getElementById("number").value)
+        getData(`https://api.mangadex.org/manga?offset=18&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+
+        pageLimit = () => {
+            let pageLimit = Number(document.getElementById('number').value)
+            console.log(pageLimit)
+            getData(`https://api.mangadex.org/manga?offset=1&limit=${pageLimit}&includes[]=cover_art&contentRating[]=safe`)
+
+        }
+
+
+        let n = 0
+        prev = () => {
+            n -= limit
+            if (n < 1) {
+                alert("Tidak ada data")
+            }
+            else {
+                getData(`https://api.mangadex.org/manga?offset=${n}&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+            }
+
+        }
+
+
+        next = () => {
+            n += limit
+            getData(`https://api.mangadex.org/manga?offset=${n}&limit=${limit}&includes[]=cover_art&contentRating[]=safe`)
+        }
+
+        async function getData(file) {
+            let mydata
+            let myHtml = ''
+            let isi = document.getElementById("cover")
+            await fetch(file).then((res) => {
+                return res.json();
+            }).then((data) => { mydata = data });
+
+
+            for (let i = 0; i < mydata.data.length; i++) {
+                let title = mydata.data[i].attributes.title.en
+                let description = mydata.data[i].attributes.description.en
+
+
+                for (let j = 0; j < mydata.data[i].relationships.length; j++) {
+                    if (mydata.data[i].relationships[j].type == "cover_art") {
+                        let imgfuck = "https://uploads.mangadex.org/covers/" + mydata.data[i].id + "/" + mydata.data[i].relationships[j].attributes.fileName
+                        myHtml +=
+                            `<div class="card">
+                             <h4>${title} </h4>
+                            <img src="${imgfuck}" alt"">
+                        </div>`
+
+                    }
+                }
+
+
+
+            }
+
+            isi.innerHTML = myHtml
+
+
+        }
+
+
+    </script>
+
+</body>
+
+</html>
